@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>collab_External_Id__c</fullName>
+    <caseSensitive>false</caseSensitive>
+    <description>Unique identifier for the canvas. Used to link canvas state to a specific context (e.g., record ID, custom identifier).</description>
+    <externalId>true</externalId>
+    <label>External Id</label>
+    <length>50</length>
+    <required>true</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>true</unique>
+</CustomField>

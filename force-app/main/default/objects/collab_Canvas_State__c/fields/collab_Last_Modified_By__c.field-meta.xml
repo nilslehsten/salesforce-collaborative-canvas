@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>collab_Last_Modified_By__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The user who last saved this canvas state.</description>
+    <externalId>false</externalId>
+    <label>Last Modified By User</label>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Canvas States</relationshipLabel>
+    <relationshipName>Canvas_States</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

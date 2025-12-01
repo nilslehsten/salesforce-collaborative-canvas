@@ -1,0 +1,758 @@
+/* Modal size override for Quick Actions */
+:host {
+    display: block;
+}
+
+/* Container */
+.canvas-container {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f3f2f2;
+    height: 80vh;
+    min-height: 500px;
+    position: relative;
+}
+
+/* Toolbar */
+.toolbar {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: #ffffff;
+    border-bottom: 1px solid #dddbda;
+    gap: 8px;
+}
+
+.tool-group {
+    display: flex;
+    gap: 4px;
+}
+
+.tool-group.separator {
+    padding-left: 12px;
+    border-left: 1px solid #dddbda;
+}
+
+.tool-group.flex-grow {
+    flex-grow: 1;
+}
+
+/* Sticky note button colors */
+.sticky-yellow {
+    --slds-c-button-neutral-color-background: #feff9c;
+}
+
+.sticky-pink {
+    --slds-c-button-neutral-color-background: #ffb8d1;
+}
+
+.sticky-blue {
+    --slds-c-button-neutral-color-background: #b8e0ff;
+}
+
+/* Users list */
+.users-list {
+    display: flex;
+    gap: 4px;
+}
+
+.user-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Canvas wrapper */
+.canvas-wrapper {
+    position: relative;
+    overflow: hidden;
+    background: #ffffff;
+    flex: 1;
+    min-height: 0;
+}
+
+.main-canvas {
+    display: block;
+    cursor: crosshair;
+}
+
+/* Zoom controls */
+.zoom-controls {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    pointer-events: auto;
+}
+
+.zoom-level {
+    font-size: 12px;
+    color: #444444;
+    min-width: 40px;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* Text editor overlay */
+.text-editor-overlay {
+    position: absolute;
+    z-index: 20;
+    padding: 4px;
+    box-sizing: border-box;
+}
+
+.text-editor {
+    width: 100%;
+    height: 100%;
+    border: 2px solid #0176d3;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: none;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.98);
+}
+
+/* Connected status in toolbar */
+.connected-status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #706e6b;
+    padding-left: 12px;
+    border-left: 1px solid #dddbda;
+}
+
+/* Tool button states */
+:host lightning-button-icon[variant="brand"] {
+    --slds-c-button-brand-color-background: #0176d3;
+}
+
+/* Loading container */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    min-height: 400px;
+}
+
+.loading-text {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #706e6b;
+}
+
+/* Error container */
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    min-height: 400px;
+    gap: 16px;
+}
+
+.error-text {
+    font-size: 14px;
+    color: #c23934;
+    text-align: center;
+    max-width: 400px;
+}
+
+/* Hide canvas wrapper during loading */
+.canvas-wrapper.hidden {
+    display: none;
+}
+
+/* Record Selector Modal */
+.record-list-container {
+    max-height: 350px;
+    overflow-y: auto;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    background: #ffffff;
+}
+
+.record-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    border-bottom: 1px solid #f3f2f2;
+}
+
+.record-item:last-child {
+    border-bottom: none;
+}
+
+.record-item:hover {
+    background-color: #f3f2f2;
+}
+
+.record-item.selected {
+    background-color: #e5f2ff;
+    border-left: 3px solid #0176d3;
+}
+
+.record-item-content {
+    display: flex;
+    align-items: center;
+}
+
+.record-item-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.record-name {
+    font-weight: 500;
+    color: #181818;
+}
+
+.record-subtitle {
+    font-size: 12px;
+    color: #706e6b;
+    margin-top: 2px;
+}
+
+.selected-check {
+    color: #0176d3;
+}
+
+/* Modal tab icons alignment */
+.slds-tabs_default__link {
+    display: flex;
+    align-items: center;
+}
+
+/* Context Toolbar */
+.context-toolbar {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid #dddbda;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 50;
+}
+
+.toolbar-item {
+    position: relative;
+}
+
+/* Color Swatch */
+.color-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 2px solid #d8d8d8;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    padding: 0;
+}
+
+.color-swatch:hover {
+    border-color: #0176d3;
+}
+
+.color-swatch.small {
+    width: 20px;
+    height: 20px;
+}
+
+.color-swatch.border-swatch {
+    background-image: linear-gradient(135deg, transparent 40%, currentColor 40%, currentColor 60%, transparent 60%);
+}
+
+/* Color Picker Dropdown */
+.color-picker-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 6px;
+    padding: 8px;
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+}
+
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+}
+
+.color-option {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.1s;
+    padding: 0;
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+    border-color: #0176d3;
+}
+
+.custom-color-input {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #eeeeee;
+}
+
+.custom-color-input input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: monospace;
+}
+
+/* Draw Tool Options */
+.draw-options {
+    position: relative;
+}
+
+.draw-color-picker {
+    left: 0;
+    transform: none;
+}
+
+.stroke-width-select {
+    padding: 4px 8px;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    font-size: 12px;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+/* Shape Palette */
+.shapes-group {
+    position: relative;
+}
+
+.shape-palette-container {
+    position: relative;
+    display: inline-flex;
+}
+
+.shape-palette-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 8px;
+    padding: 12px;
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    z-index: 200;
+    min-width: 240px;
+}
+
+.shape-palette-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.shape-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 4px;
+    background: #f8f8f8;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.shape-option:hover {
+    background: #e5f2ff;
+    border-color: #0176d3;
+    transform: translateY(-1px);
+}
+
+.shape-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.shape-option span {
+    font-size: 10px;
+    color: #444444;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* ========== Sticky & Connector Palette Dropdowns ========== */
+
+.sticky-palette-container,
+.connector-palette-container {
+    position: relative;
+    display: inline-flex;
+}
+
+.toolbar-dropdown-button {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 8px;
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.toolbar-dropdown-button:hover {
+    background: #f3f2f2;
+    border-color: #0176d3;
+}
+
+/* Select Tool Button (custom SVG) */
+.toolbar-tool-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: #ffffff;
+    border: 1px solid #c9c9c9;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: #706e6b;
+}
+
+.toolbar-tool-button:hover {
+    background: #f3f2f2;
+    border-color: #0176d3;
+    color: #0176d3;
+}
+
+.toolbar-tool-button.active {
+    background: #0176d3;
+    color: #ffffff;
+}
+
+.toolbar-tool-button .select-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.toolbar-icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* Undo/Redo History Buttons */
+.toolbar-history-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: #ffffff;
+    border: 1px solid #c9c9c9;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: #706e6b;
+}
+
+.toolbar-history-button:hover:not(.disabled) {
+    background: #f3f2f2;
+    border-color: #0176d3;
+    color: #0176d3;
+}
+
+.toolbar-history-button.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f3f2f2;
+}
+
+.history-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.chevron-icon {
+    margin-left: 2px;
+}
+
+.palette-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 200;
+    min-width: 140px;
+    padding: 4px 0;
+}
+
+.sticky-dropdown,
+.connector-dropdown {
+    min-width: 130px;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    text-align: left;
+    font-size: 13px;
+    color: #181818;
+    transition: background-color 0.1s ease;
+}
+
+.dropdown-item:hover {
+    background: #f3f2f2;
+}
+
+.dropdown-item.active {
+    background: #e5f2ff;
+    color: #0176d3;
+}
+
+.color-swatch-small {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.connector-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.dropdown-item-label {
+    flex: 1;
+}
+
+/* ========== Text Alignment Controls ========== */
+
+.alignment-controls {
+    display: flex;
+    gap: 2px;
+    padding-left: 8px;
+    margin-left: 8px;
+    border-left: 1px solid #dddbda;
+}
+
+.alignment-controls button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    color: #706e6b;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.alignment-controls button:hover {
+    background: #f3f2f2;
+    border-color: #dddbda;
+    color: #181818;
+}
+
+.alignment-controls button.active {
+    background: #0176d3;
+    border-color: #0176d3;
+    color: #ffffff;
+}
+
+.alignment-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* ========== Layer Controls ========== */
+
+.layer-controls {
+    display: flex;
+    gap: 2px;
+    padding-left: 8px;
+    margin-left: 8px;
+    border-left: 1px solid #dddbda;
+}
+
+/* ========== Keyboard Shortcuts Help Modal ========== */
+
+.help-modal-content {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.shortcut-group {
+    margin-bottom: 1.25rem;
+}
+
+.shortcut-group:last-child {
+    margin-bottom: 0;
+}
+
+.shortcut-key {
+    width: 140px;
+    font-family: monospace;
+}
+
+.shortcut-key kbd {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    line-height: 1.4;
+    color: #444;
+    background-color: #f7f7f7;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.shortcut-desc {
+    color: #555;
+}
+
+/* ========== Text Control Dropdowns ========== */
+
+.dropdown-container {
+    position: relative;
+}
+
+.text-control-button {
+    min-width: 60px;
+    padding: 4px 6px;
+    font-size: 12px;
+}
+
+.text-control-button .dropdown-label {
+    flex: 1;
+    text-align: left;
+    font-size: 12px;
+    color: #181818;
+}
+
+.text-control-button .dropdown-chevron {
+    width: 12px;
+    height: 12px;
+    color: #706e6b;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 4px;
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    min-width: 80px;
+    overflow: hidden;
+}
+
+.text-dropdown button {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    text-align: left;
+    font-size: 12px;
+    color: #181818;
+    transition: background-color 0.1s ease;
+}
+
+.text-dropdown button:hover {
+    background: #f3f2f2;
+}
+
+.text-dropdown button.active {
+    background: #0176d3;
+    color: #ffffff;
+}
+
+/* Connector Label Button */
+.toolbar-label-button {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    background: #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.1s ease;
+}
+
+.toolbar-label-button:hover {
+    background: #f3f2f2;
+}
+
+.label-icon {
+    width: 16px;
+    height: 16px;
+}

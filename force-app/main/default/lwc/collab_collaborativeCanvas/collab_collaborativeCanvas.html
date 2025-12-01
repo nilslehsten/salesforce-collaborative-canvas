@@ -1,0 +1,776 @@
+<template>
+    <div class="canvas-container">
+        <!-- Loading State -->
+        <template lwc:if={isLoading}>
+            <div class="loading-container">
+                <lightning-spinner alternative-text="Loading canvas..." size="large"></lightning-spinner>
+                <p class="loading-text">Loading Collaborative Canvas...</p>
+            </div>
+        </template>
+
+        <!-- Error State -->
+        <template lwc:if={hasError}>
+            <div class="error-container">
+                <lightning-icon icon-name="utility:error" variant="error" size="large"></lightning-icon>
+                <p class="error-text">{errorMessage}</p>
+                <lightning-button label="Close" onclick={handleClose}></lightning-button>
+            </div>
+        </template>
+
+        <!-- Canvas Content -->
+        <template lwc:if={isReady}>
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="tool-group">
+                    <button class={selectButtonClass} onclick={handleSelectTool} title="Select (V)">
+                        <svg viewBox="0 0 24 24" class="toolbar-icon select-icon">
+                            <path d="M7 2L7 18L11 14L14 21L16 20L13 13L18 13Z" fill="currentColor" stroke="currentColor" stroke-width="0.5" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <button class={panButtonClass} onclick={handlePanTool} title="Pan (M) - Hold Space to pan temporarily">
+                        <svg viewBox="0 0 24 24" class="toolbar-icon pan-icon">
+                            <path d="M12 2L8 6h3v5H6V8L2 12l4 4v-3h5v5H8l4 4 4-4h-3v-5h5v3l4-4-4-4v3h-5V6h3L12 2z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <lightning-button-icon
+                        icon-name="utility:edit"
+                        alternative-text="Draw"
+                        title="Draw (D)"
+                        variant={drawVariant}
+                        onclick={handleDrawTool}
+                    ></lightning-button-icon>
+                    <lightning-button-icon
+                        icon-name="utility:delete"
+                        alternative-text="Eraser"
+                        title="Eraser (E) - Click to erase strokes"
+                        variant={eraserVariant}
+                        onclick={handleEraserTool}
+                    ></lightning-button-icon>
+                </div>
+
+                <div class="tool-group separator">
+                    <!-- Sticky Note Dropdown -->
+                    <div class="sticky-palette-container">
+                        <button class="toolbar-dropdown-button" onclick={handleToggleStickyPalette} title="Add Sticky Note">
+                            <svg viewBox="0 0 24 24" class="toolbar-icon">
+                                <rect x="3" y="3" width="18" height="18" rx="2" fill="#fff740" stroke="#666" stroke-width="1"/>
+                                <line x1="6" y1="8" x2="18" y2="8" stroke="#666" stroke-width="1"/>
+                                <line x1="6" y1="12" x2="14" y2="12" stroke="#666" stroke-width="1"/>
+                            </svg>
+                            <lightning-icon icon-name="utility:chevrondown" size="xx-small" class="chevron-icon"></lightning-icon>
+                        </button>
+                        <template lwc:if={showStickyPalette}>
+                            <div class="palette-dropdown sticky-dropdown">
+                                <template for:each={stickyColors} for:item="sticky">
+                                    <button key={sticky.name}
+                                            class="dropdown-item"
+                                            data-color={sticky.color}
+                                            onclick={handleAddStickyFromPalette}>
+                                        <span class="color-swatch-small" style={sticky.swatchStyle}></span>
+                                        <span class="dropdown-item-label">{sticky.name}</span>
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="tool-group separator shapes-group">
+                    <!-- Shapes Dropdown (All shapes consolidated) -->
+                    <div class="shape-palette-container">
+                        <button class="toolbar-dropdown-button" onclick={handleToggleShapePalette} title="Shapes">
+                            <svg viewBox="0 0 24 24" class="toolbar-icon">
+                                <rect x="3" y="6" width="18" height="12" fill="none" stroke="currentColor" stroke-width="1.5" rx="1"/>
+                            </svg>
+                            <lightning-icon icon-name="utility:chevrondown" size="xx-small" class="chevron-icon"></lightning-icon>
+                        </button>
+                        <template lwc:if={showShapePalette}>
+                            <div class="shape-palette-dropdown">
+                                <div class="shape-palette-grid">
+                                    <button class="shape-option" onclick={handleAddRectangle} title="Rectangle (R)">
+                                        <svg viewBox="0 0 24 24" class="shape-icon">
+                                            <rect x="3" y="6" width="18" height="12" fill="#E8E8E8" stroke="#666" stroke-width="1.5"/>
+                                        </svg>
+                                        <span>Rectangle</span>
+                                    </button>
+                                    <button class="shape-option" onclick={handleAddCircle} title="Circle (O)">
+                                        <svg viewBox="0 0 24 24" class="shape-icon">
+                                            <circle cx="12" cy="12" r="9" fill="#E8E8E8" stroke="#666" stroke-width="1.5"/>
+                                        </svg>
+                                        <span>Circle</span>
+                                    </button>
+                                    <button class="shape-option" onclick={handleAddDiamond} title="Diamond">
+                                        <svg viewBox="0 0 24 24" class="shape-icon">
+                                            <path d="M12 2 L22 12 L12 22 L2 12 Z" fill="#E8E8E8" stroke="#666" stroke-width="1.5"/>
+                                        </svg>
+                                        <span>Diamond</span>
+                                    </button>
+                                    <button class="shape-option" onclick={handleAddTriangle} title="Triangle">
+                                        <svg viewBox="0 0 24 24" class="shape-icon">
+                                            <path d="M12 3 L22 21 L2 21 Z" fill="#E8E8E8" stroke="#666" stroke-width="1.5"/>
+                                        </svg>
+                                        <span>Triangle</span>
+                                    </button>
+                                    <button class="shape-option" onclick={handleAddHexagon} title="Hexagon">
+                                        <svg viewBox="0 0 24 24" class="shape-icon">
+                                            <path d="M12 2 L21 7 L21 17 L12 22 L3 17 L3 7 Z" fill="#E8E8E8" stroke="#666" stroke-width="1.5"/>
+                                        </svg>
+                                        <span>Hexagon</span>
+                                    </button>
+                                    <button class="shape-option" onclick={handleAddParallelogram} title="Parallelogram">
+                                        <svg viewBox="0 0 24 24" class="shape-icon">
+                                            <path d="M6 4 L22 4 L18 20 L2 20 Z" fill="#E8E8E8" stroke="#666" stroke-width="1.5"/>
+                                        </svg>
+                                        <span>Parallel</span>
+                                    </button>
+                                    <button class="shape-option" onclick={handleAddCylinder} title="Cylinder">
+                                        <svg viewBox="0 0 24 24" class="shape-icon">
+                                            <ellipse cx="12" cy="5" rx="8" ry="3" fill="#F0F0F0" stroke="#666" stroke-width="1.5"/>
+                                            <path d="M4 5 L4 19 M20 5 L20 19" stroke="#666" stroke-width="1.5" fill="none"/>
+                                            <ellipse cx="12" cy="19" rx="8" ry="3" fill="#E8E8E8" stroke="#666" stroke-width="1.5"/>
+                                            <rect x="4" y="5" width="16" height="14" fill="#E8E8E8" stroke="none"/>
+                                        </svg>
+                                        <span>Cylinder</span>
+                                    </button>
+                                    <button class="shape-option" onclick={handleAddCloud} title="Cloud">
+                                        <svg viewBox="0 0 24 24" class="shape-icon">
+                                            <path d="M4 17C2 17 0.5 15.5 0.5 13.5C0.5 11.7 1.8 10.2 3.5 9.8C3.9 7.7 5.7 6 8 6C8.4 6 8.8 6.1 9.2 6.2C10.3 4.5 12.2 3.5 14.5 3.5C17.5 3.5 20 5.8 20.3 8.7C21.7 9.3 22.8 10.6 23.2 12.2C23.4 12.8 23.5 13.4 23.5 14C23.5 16.2 21.7 18 19.5 18H4Z" transform="translate(0, -0.5)" fill="#E8E8E8" stroke="#666" stroke-width="1.5" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span>Cloud</span>
+                                    </button>
+                                    <button class="shape-option" onclick={handleAddRoundedRectangle} title="Rounded Rectangle">
+                                        <svg viewBox="0 0 24 24" class="shape-icon">
+                                            <rect x="2" y="5" width="20" height="14" rx="4" ry="4" fill="#E8E8E8" stroke="#666" stroke-width="1.5"/>
+                                        </svg>
+                                        <span>Rounded</span>
+                                    </button>
+                                    <button class="shape-option" onclick={handleAddDocument} title="Document">
+                                        <svg viewBox="0 0 24 24" class="shape-icon">
+                                            <path d="M4 2 L20 2 L20 18 Q16 22 12 18 Q8 22 4 18 Z" fill="#E8E8E8" stroke="#666" stroke-width="1.5"/>
+                                        </svg>
+                                        <span>Document</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Undo/Redo Buttons -->
+                <div class="tool-group separator">
+                    <button class={undoButtonClass} onclick={handleUndo} disabled={undoDisabled} title="Undo (Ctrl+Z)">
+                        <svg viewBox="0 0 24 24" class="toolbar-icon history-icon">
+                            <path d="M12.5 8C9.85 8 7.45 9.01 5.6 10.6L2 7v9h9l-3.62-3.62C8.98 10.87 10.67 10 12.5 10c3.03 0 5.6 2.06 6.36 4.86l1.94-.64C19.73 10.5 16.42 8 12.5 8z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <button class={redoButtonClass} onclick={handleRedo} disabled={redoDisabled} title="Redo (Ctrl+Y)">
+                        <svg viewBox="0 0 24 24" class="toolbar-icon history-icon">
+                            <path d="M18.4 10.6C16.55 9.01 14.15 8 11.5 8c-3.92 0-7.23 2.5-8.3 6.22l1.94.64C5.9 12.06 8.47 10 11.5 10c1.83 0 3.52.87 4.12 2.38L12 16h9V7l-3.6 3.6z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="tool-group separator">
+                    <!-- Connector Dropdown -->
+                    <div class="connector-palette-container">
+                        <button class="toolbar-dropdown-button" onclick={handleToggleConnectorPalette} title="Connectors">
+                            <svg viewBox="0 0 24 24" class="toolbar-icon">
+                                <line x1="4" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2"/>
+                                <polygon points="20,12 14,8 14,16" fill="currentColor"/>
+                            </svg>
+                            <lightning-icon icon-name="utility:chevrondown" size="xx-small" class="chevron-icon"></lightning-icon>
+                        </button>
+                        <template lwc:if={showConnectorPalette}>
+                            <div class="palette-dropdown connector-dropdown">
+                                <template for:each={connectorTypesForPalette} for:item="conn">
+                                    <button key={conn.type}
+                                            class={conn.itemClass}
+                                            data-type={conn.type}
+                                            onclick={handleSelectConnectorFromPalette}>
+                                        <span class="connector-icon">{conn.icon}</span>
+                                        <span class="dropdown-item-label">{conn.name}</span>
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Draw Tool Options (visible when draw tool active) -->
+                <template lwc:if={isDrawToolActive}>
+                    <div class="tool-group separator draw-options">
+                        <button class="color-swatch small" style={drawColorStyle} onclick={handleDrawColorClick} title="Stroke Color"></button>
+                        <template lwc:if={showDrawColorPicker}>
+                            <div class="color-picker-dropdown draw-color-picker">
+                                <div class="color-grid">
+                                    <template for:each={colorPalette} for:item="color">
+                                        <button
+                                            key={color.value}
+                                            class="color-option"
+                                            style={color.style}
+                                            data-color={color.value}
+                                            data-target="draw"
+                                            onclick={handleColorSelect}
+                                            title={color.name}
+                                        ></button>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                        <select class="stroke-width-select" onchange={handleStrokeWidthChange} title="Stroke Width">
+                            <template for:each={strokeWidthOptions} for:item="opt">
+                                <option key={opt.value} value={opt.value} selected={opt.selected}>{opt.label}</option>
+                            </template>
+                        </select>
+                    </div>
+                </template>
+
+                <div class="tool-group separator">
+                    <lightning-button
+                        label="Add Record"
+                        icon-name="utility:add"
+                        onclick={handleOpenRecordModal}
+                    ></lightning-button>
+                    <lightning-button
+                        label="Activities"
+                        icon-name="utility:task"
+                        onclick={handleOpenActivityModal}
+                    ></lightning-button>
+                </div>
+
+                <div class="tool-group separator flex-grow">
+                    <lightning-button
+                        label="Save"
+                        variant="brand"
+                        onclick={handleSave}
+                    ></lightning-button>
+                </div>
+
+                <!-- Help Button -->
+                <div class="tool-group">
+                    <lightning-button-icon
+                        icon-name="utility:question"
+                        alternative-text="Keyboard Shortcuts"
+                        title="Keyboard Shortcuts (?)"
+                        onclick={handleOpenHelp}
+                    ></lightning-button-icon>
+                </div>
+
+                <div class="users-list">
+                    <template for:each={connectedUsers} for:item="user">
+                        <span
+                            key={user.id}
+                            class="user-avatar"
+                            style={user.style}
+                            title={user.name}
+                        >{user.initials}</span>
+                    </template>
+                </div>
+
+                <div class="status-item connected-status">
+                    <lightning-icon icon-name="utility:connected_apps" size="xx-small"></lightning-icon>
+                    <span>{connectedCount} connected</span>
+                </div>
+            </div>
+        </template>
+
+        <!-- Canvas is always rendered but hidden during loading to allow refs to work -->
+        <div class={canvasWrapperClass} style={canvasWrapperStyle} lwc:ref="canvasWrapper">
+            <canvas
+                class="main-canvas"
+                lwc:ref="mainCanvas"
+                onmousemove={handleMouseMove}
+                onmousedown={handleMouseDown}
+                onmouseup={handleMouseUp}
+                onmouseleave={handleMouseLeave}
+                ondblclick={handleDoubleClick}
+            ></canvas>
+
+            <!-- Inline text editor for sticky notes -->
+            <template lwc:if={isEditingText}>
+                <div class="text-editor-overlay" style={textEditorStyle}>
+                    <textarea
+                        lwc:ref="textEditor"
+                        class="text-editor"
+                        value={editingText}
+                        onblur={handleTextEditorBlur}
+                        onkeydown={handleTextEditorKeydown}
+                    ></textarea>
+                </div>
+            </template>
+
+            <!-- Context Toolbar (appears when element selected) -->
+            <template lwc:if={showContextToolbar}>
+                <div class="context-toolbar" style={contextToolbarStyle}>
+                    <!-- Fill Color -->
+                    <div class="toolbar-item">
+                        <button class="color-swatch" style={fillColorStyle} onclick={handleFillColorClick} title="Fill Color"></button>
+                        <template lwc:if={showFillColorPicker}>
+                            <div class="color-picker-dropdown">
+                                <div class="color-grid">
+                                    <template for:each={colorPalette} for:item="color">
+                                        <button
+                                            key={color.value}
+                                            class="color-option"
+                                            style={color.style}
+                                            data-color={color.value}
+                                            data-target="fill"
+                                            onclick={handleColorSelect}
+                                            title={color.name}
+                                        ></button>
+                                    </template>
+                                </div>
+                                <div class="custom-color-input">
+                                    <input type="text" placeholder="#RRGGBB" value={customColorValue} onchange={handleCustomFillColor} maxlength="7">
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Border Color (shapes only) -->
+                    <template lwc:if={showBorderOption}>
+                        <div class="toolbar-item">
+                            <button class="color-swatch border-swatch" style={borderColorStyle} onclick={handleBorderColorClick} title="Border Color"></button>
+                            <template lwc:if={showBorderColorPicker}>
+                                <div class="color-picker-dropdown">
+                                    <div class="color-grid">
+                                        <template for:each={colorPalette} for:item="color">
+                                            <button
+                                                key={color.value}
+                                                class="color-option"
+                                                style={color.style}
+                                                data-color={color.value}
+                                                data-target="border"
+                                                onclick={handleColorSelect}
+                                                title={color.name}
+                                            ></button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Text Alignment (for stickies and shapes) -->
+                    <template lwc:if={showAlignmentButtons}>
+                        <div class="toolbar-item alignment-controls">
+                            <button class={alignTopClass} onclick={handleAlignTop} title="Align Top">
+                                <svg viewBox="0 0 16 16" class="alignment-icon">
+                                    <rect x="2" y="2" width="12" height="2" fill="currentColor"/>
+                                    <rect x="4" y="6" width="8" height="1.5" fill="currentColor" opacity="0.6"/>
+                                    <rect x="4" y="9" width="6" height="1.5" fill="currentColor" opacity="0.4"/>
+                                </svg>
+                            </button>
+                            <button class={alignMiddleClass} onclick={handleAlignMiddle} title="Align Middle">
+                                <svg viewBox="0 0 16 16" class="alignment-icon">
+                                    <rect x="4" y="4" width="8" height="1.5" fill="currentColor" opacity="0.4"/>
+                                    <rect x="2" y="7" width="12" height="2" fill="currentColor"/>
+                                    <rect x="4" y="10.5" width="6" height="1.5" fill="currentColor" opacity="0.4"/>
+                                </svg>
+                            </button>
+                            <button class={alignBottomClass} onclick={handleAlignBottom} title="Align Bottom">
+                                <svg viewBox="0 0 16 16" class="alignment-icon">
+                                    <rect x="4" y="5" width="6" height="1.5" fill="currentColor" opacity="0.4"/>
+                                    <rect x="4" y="8.5" width="8" height="1.5" fill="currentColor" opacity="0.6"/>
+                                    <rect x="2" y="12" width="12" height="2" fill="currentColor"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- Text Overflow Dropdown -->
+                    <template lwc:if={showTextOverflowDropdown}>
+                        <div class="toolbar-item dropdown-container">
+                            <button class="toolbar-dropdown-button text-control-button" onclick={handleTextOverflowToggle} title="Text Overflow">
+                                <span class="dropdown-label">{currentTextOverflowLabel}</span>
+                                <svg class="dropdown-chevron" viewBox="0 0 16 16">
+                                    <path fill="currentColor" d="M4.5 5.5L8 9l3.5-3.5L13 7l-5 5-5-5z"/>
+                                </svg>
+                            </button>
+                            <template lwc:if={showTextOverflowPicker}>
+                                <div class="dropdown-menu text-dropdown">
+                                    <template for:each={textOverflowOptions} for:item="option">
+                                        <button
+                                            key={option.value}
+                                            class={option.class}
+                                            data-value={option.value}
+                                            onclick={handleTextOverflowChange}
+                                        >{option.label}</button>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Font Size Dropdown -->
+                    <template lwc:if={showFontSizeDropdown}>
+                        <div class="toolbar-item dropdown-container">
+                            <button class="toolbar-dropdown-button text-control-button" onclick={handleFontSizeToggle} title="Font Size">
+                                <span class="dropdown-label">{currentFontSizeLabel}</span>
+                                <svg class="dropdown-chevron" viewBox="0 0 16 16">
+                                    <path fill="currentColor" d="M4.5 5.5L8 9l3.5-3.5L13 7l-5 5-5-5z"/>
+                                </svg>
+                            </button>
+                            <template lwc:if={showFontSizePicker}>
+                                <div class="dropdown-menu text-dropdown">
+                                    <template for:each={fontSizeOptions} for:item="option">
+                                        <button
+                                            key={option.value}
+                                            class={option.class}
+                                            data-value={option.value}
+                                            onclick={handleFontSizeChange}
+                                        >{option.label}</button>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Connector Label Button -->
+                    <template lwc:if={showConnectorLabelButton}>
+                        <div class="toolbar-item">
+                            <button class="toolbar-label-button" onclick={handleConnectorLabelClick} title="Add/Edit Label">
+                                <svg viewBox="0 0 16 16" class="label-icon">
+                                    <text x="4" y="12" font-size="11" font-weight="bold" fill="currentColor">T</text>
+                                </svg>
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- Layer Controls -->
+                    <div class="toolbar-item layer-controls">
+                        <lightning-button-icon
+                            icon-name="utility:jump_to_top"
+                            variant="bare"
+                            alternative-text="Bring to Front"
+                            title="Bring to Front (Ctrl+Shift+])"
+                            onclick={handleBringToFront}
+                            disabled={isAtFront}
+                        ></lightning-button-icon>
+                        <lightning-button-icon
+                            icon-name="utility:arrowup"
+                            variant="bare"
+                            alternative-text="Bring Forward"
+                            title="Bring Forward (Ctrl+])"
+                            onclick={handleBringForward}
+                            disabled={isAtFront}
+                        ></lightning-button-icon>
+                        <lightning-button-icon
+                            icon-name="utility:arrowdown"
+                            variant="bare"
+                            alternative-text="Send Backward"
+                            title="Send Backward (Ctrl+[)"
+                            onclick={handleSendBackward}
+                            disabled={isAtBack}
+                        ></lightning-button-icon>
+                        <lightning-button-icon
+                            icon-name="utility:jump_to_bottom"
+                            variant="bare"
+                            alternative-text="Send to Back"
+                            title="Send to Back (Ctrl+Shift+[)"
+                            onclick={handleSendToBack}
+                            disabled={isAtBack}
+                        ></lightning-button-icon>
+                    </div>
+
+                    <!-- Delete -->
+                    <div class="toolbar-item">
+                        <lightning-button-icon
+                            icon-name="utility:delete"
+                            variant="bare"
+                            alternative-text="Delete"
+                            title="Delete"
+                            onclick={handleDeleteFromToolbar}
+                        ></lightning-button-icon>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Zoom controls (bottom-right, outside canvas wrapper) -->
+        <div class="zoom-controls">
+            <lightning-button-icon
+                icon-name="utility:dash"
+                alternative-text="Zoom Out"
+                title="Zoom Out"
+                size="small"
+                onclick={handleZoomOut}
+            ></lightning-button-icon>
+            <span class="zoom-level">{zoomPercentage}%</span>
+            <lightning-button-icon
+                icon-name="utility:add"
+                alternative-text="Zoom In"
+                title="Zoom In"
+                size="small"
+                onclick={handleZoomIn}
+            ></lightning-button-icon>
+            <lightning-button-icon
+                icon-name="utility:expand"
+                alternative-text="Fit to Content"
+                title="Fit to Content"
+                size="small"
+                onclick={handleFitToContent}
+            ></lightning-button-icon>
+            <lightning-button-icon
+                icon-name="utility:target"
+                alternative-text="Center View"
+                title="Center View"
+                size="small"
+                onclick={handleCenterView}
+            ></lightning-button-icon>
+        </div>
+
+        <!-- Record Selector Modal -->
+        <template lwc:if={isRecordModalOpen}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium" aria-modal="true">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick={handleCloseRecordModal}>
+                            <lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
+                        </button>
+                        <h2 class="slds-modal__title">Add Records to Canvas</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <!-- Tabs -->
+                        <div class="slds-tabs_default">
+                            <ul class="slds-tabs_default__nav" role="tablist">
+                                <li class={contactsTabClass} role="presentation">
+                                    <a class="slds-tabs_default__link" role="tab" data-tab="contacts" onclick={handleRecordTabClick}>
+                                        <lightning-icon icon-name="standard:contact" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                        Contacts
+                                    </a>
+                                </li>
+                                <li class={opportunitiesTabClass} role="presentation">
+                                    <a class="slds-tabs_default__link" role="tab" data-tab="opportunities" onclick={handleRecordTabClick}>
+                                        <lightning-icon icon-name="standard:opportunity" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                        Opportunities
+                                    </a>
+                                </li>
+                                <li class={leadsTabClass} role="presentation">
+                                    <a class="slds-tabs_default__link" role="tab" data-tab="leads" onclick={handleRecordTabClick}>
+                                        <lightning-icon icon-name="standard:lead" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                        Leads
+                                    </a>
+                                </li>
+                                <li class={usersTabClass} role="presentation">
+                                    <a class="slds-tabs_default__link" role="tab" data-tab="users" onclick={handleRecordTabClick}>
+                                        <lightning-icon icon-name="standard:user" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                        Users
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Search -->
+                        <div class="slds-m-top_small slds-m-bottom_small">
+                            <lightning-input
+                                type="search"
+                                label="Search"
+                                variant="label-hidden"
+                                placeholder={searchPlaceholder}
+                                value={recordSearchTerm}
+                                onchange={handleRecordSearchChange}
+                            ></lightning-input>
+                        </div>
+
+                        <!-- Records List -->
+                        <div class="record-list-container">
+                            <template lwc:if={isLoadingRecords}>
+                                <div class="slds-align_absolute-center slds-p-around_medium">
+                                    <lightning-spinner alternative-text="Loading..." size="small"></lightning-spinner>
+                                </div>
+                            </template>
+
+                            <template lwc:if={isNotLoadingRecords}>
+                                <template lwc:if={hasRecords}>
+                                    <ul class="slds-has-dividers_bottom-space">
+                                        <template for:each={recordsWithSelection} for:item="rec">
+                                            <li key={rec.recordId} class={rec.itemClass} data-id={rec.recordId} onclick={handleRecordItemClick}>
+                                                <div class="record-item-content">
+                                                    <lightning-icon icon-name={rec.iconName} size="small" class="slds-m-right_small"></lightning-icon>
+                                                    <div class="record-item-text">
+                                                        <span class="record-name">{rec.name}</span>
+                                                        <template lwc:if={rec.subtitle}>
+                                                            <span class="record-subtitle">{rec.subtitle}</span>
+                                                        </template>
+                                                    </div>
+                                                    <template lwc:if={rec.isSelected}>
+                                                        <lightning-icon icon-name="utility:check" size="x-small" class="selected-check"></lightning-icon>
+                                                    </template>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </template>
+                                <template lwc:if={noRecords}>
+                                    <div class="slds-align_absolute-center slds-p-around_medium slds-text-color_weak">
+                                        <template lwc:if={requiresSearch}>
+                                            Type at least 2 characters to search
+                                        </template>
+                                        <template lwc:if={noSearchRequired}>
+                                            No records found
+                                        </template>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={handleCloseRecordModal}></lightning-button>
+                        <lightning-button
+                            label={addRecordsButtonLabel}
+                            variant="brand"
+                            onclick={handleAddSelectedRecords}
+                            disabled={noSelectedRecords}
+                            class="slds-m-left_x-small"
+                        ></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- Activity Selector Modal -->
+        <template lwc:if={isActivityModalOpen}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium" aria-modal="true">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" onclick={handleCloseActivityModal}>
+                            <lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
+                        </button>
+                        <h2 class="slds-modal__title">Add Activities to Canvas</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <!-- Tabs -->
+                        <div class="slds-tabs_default">
+                            <ul class="slds-tabs_default__nav" role="tablist">
+                                <li class={tasksTabClass} role="presentation">
+                                    <a class="slds-tabs_default__link" role="tab" data-tab="tasks" onclick={handleActivityTabClick}>
+                                        <lightning-icon icon-name="standard:task" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                        Tasks
+                                    </a>
+                                </li>
+                                <li class={eventsTabClass} role="presentation">
+                                    <a class="slds-tabs_default__link" role="tab" data-tab="events" onclick={handleActivityTabClick}>
+                                        <lightning-icon icon-name="standard:event" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                        Events
+                                    </a>
+                                </li>
+                                <li class={emailsTabClass} role="presentation">
+                                    <a class="slds-tabs_default__link" role="tab" data-tab="emails" onclick={handleActivityTabClick}>
+                                        <lightning-icon icon-name="standard:email" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                        Emails
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Search -->
+                        <div class="slds-m-top_small slds-m-bottom_small">
+                            <lightning-input
+                                type="search"
+                                label="Search"
+                                variant="label-hidden"
+                                placeholder={activitySearchPlaceholder}
+                                value={activitySearchTerm}
+                                onchange={handleActivitySearchChange}
+                            ></lightning-input>
+                        </div>
+
+                        <!-- Activities List -->
+                        <div class="record-list-container">
+                            <template lwc:if={isLoadingActivities}>
+                                <div class="slds-align_absolute-center slds-p-around_medium">
+                                    <lightning-spinner alternative-text="Loading..." size="small"></lightning-spinner>
+                                </div>
+                            </template>
+
+                            <template lwc:if={isNotLoadingActivities}>
+                                <template lwc:if={hasActivities}>
+                                    <ul class="slds-has-dividers_bottom-space">
+                                        <template for:each={activitiesWithSelection} for:item="act">
+                                            <li key={act.recordId} class={act.itemClass} data-id={act.recordId} onclick={handleActivityItemClick}>
+                                                <div class="record-item-content">
+                                                    <lightning-icon icon-name={act.fullIconName} size="small" class="slds-m-right_small"></lightning-icon>
+                                                    <div class="record-item-text">
+                                                        <span class="record-name">{act.subject}</span>
+                                                        <template lwc:if={act.subtitle}>
+                                                            <span class="record-subtitle">{act.subtitle}</span>
+                                                        </template>
+                                                    </div>
+                                                    <template lwc:if={act.isSelected}>
+                                                        <lightning-icon icon-name="utility:check" size="x-small" class="selected-check"></lightning-icon>
+                                                    </template>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </template>
+                                <template lwc:if={noActivities}>
+                                    <div class="slds-align_absolute-center slds-p-around_medium slds-text-color_weak">
+                                        No {activityModalTab} found
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={handleCloseActivityModal}></lightning-button>
+                        <lightning-button
+                            label={addActivitiesButtonLabel}
+                            variant="brand"
+                            onclick={handleAddSelectedActivities}
+                            disabled={noSelectedActivities}
+                            class="slds-m-left_x-small"
+                        ></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <!-- Keyboard Shortcuts Help Modal -->
+        <template lwc:if={showHelpModal}>
+            <section role="dialog" tabindex="-1" aria-modal="true" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <lightning-button-icon
+                            icon-name="utility:close"
+                            alternative-text="Close"
+                            class="slds-modal__close"
+                            onclick={handleCloseHelp}
+                        ></lightning-button-icon>
+                        <h2 class="slds-modal__title">Keyboard Shortcuts</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium help-modal-content">
+                        <template for:each={groupedShortcuts} for:item="group">
+                            <div key={group.category} class="shortcut-group">
+                                <h3 class="slds-text-heading_small slds-m-bottom_x-small">
+                                    {group.category}
+                                </h3>
+                                <table class="slds-table slds-table_bordered">
+                                    <tbody>
+                                        <template for:each={group.items} for:item="shortcut">
+                                            <tr key={shortcut.key}>
+                                                <td class="shortcut-key">
+                                                    <kbd>{shortcut.key}</kbd>
+                                                </td>
+                                                <td class="shortcut-desc">
+                                                    {shortcut.description}
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Close" onclick={handleCloseHelp}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open" onclick={handleHelpBackdropClick}></div>
+        </template>
+    </div>
+</template>

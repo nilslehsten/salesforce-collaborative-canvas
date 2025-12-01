@@ -1,0 +1,79 @@
+<template>
+    <lightning-card title="Collaborative Canvas" icon-name="custom:custom88">
+        <lightning-button
+            slot="actions"
+            label="Open Canvas"
+            variant="brand"
+            icon-name="utility:expand"
+            onclick={handleOpenCanvas}
+        ></lightning-button>
+
+        <div class="slds-p-around_medium" style={containerStyle}>
+            <!-- Loading State -->
+            <template lwc:if={isLoading}>
+                <div class="loading-container">
+                    <lightning-spinner alternative-text="Loading preview..." size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <!-- Error State -->
+            <template lwc:if={hasError}>
+                <div class="empty-state">
+                    <lightning-icon icon-name="utility:warning" variant="warning" size="large"></lightning-icon>
+                    <p class="slds-m-top_small slds-text-color_weak">{errorMessage}</p>
+                </div>
+            </template>
+
+            <!-- Empty State -->
+            <template lwc:if={showEmptyState}>
+                <div class="empty-state">
+                    <lightning-icon icon-name="utility:canvas" size="large"></lightning-icon>
+                    <p class="slds-m-top_small slds-text-heading_small">No canvas content yet</p>
+                    <p class="slds-text-color_weak">Click "Open Canvas" to start collaborating</p>
+                </div>
+            </template>
+
+            <!-- Canvas Preview -->
+            <template lwc:if={showCanvas}>
+                <div class="canvas-preview">
+                    <canvas lwc:ref="previewCanvas" class="preview-canvas" style={canvasStyle} onclick={handleCanvasClick}></canvas>
+                    <div class="preview-overlay">
+                        <span class="preview-label">Preview (Read-only)</span>
+                    </div>
+                    <!-- Zoom controls -->
+                    <div class="zoom-controls">
+                        <lightning-button-icon
+                            icon-name="utility:dash"
+                            alternative-text="Zoom Out"
+                            title="Zoom Out"
+                            size="small"
+                            onclick={handleZoomOut}
+                        ></lightning-button-icon>
+                        <span class="zoom-level">{zoomPercentage}%</span>
+                        <lightning-button-icon
+                            icon-name="utility:add"
+                            alternative-text="Zoom In"
+                            title="Zoom In"
+                            size="small"
+                            onclick={handleZoomIn}
+                        ></lightning-button-icon>
+                        <lightning-button-icon
+                            icon-name="utility:expand"
+                            alternative-text="Fit to Content"
+                            title="Fit to Content"
+                            size="small"
+                            onclick={handleFitToContent}
+                        ></lightning-button-icon>
+                        <lightning-button-icon
+                            icon-name="utility:target"
+                            alternative-text="Center View"
+                            title="Center View (0,0)"
+                            size="small"
+                            onclick={handleCenterView}
+                        ></lightning-button-icon>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>
