@@ -9,7 +9,8 @@
 
 > Multiple users see each other's cursors moving in real-time, collaborate on sticky notes and shapes, draw together, and everything syncs instantly across all connected clients.
 
-<img width="1867" height="934" alt="image" src="https://github.com/user-attachments/assets/33924c3f-e7a7-4ec5-be9b-7c9032e7ef14" />
+<img width="1868" height="936" alt="Screenshot 2025-12-02 115258" src="https://github.com/user-attachments/assets/2764864e-cdaa-4426-af52-ff82072f8b03" />
+
 
 
 ![SF-Collab Demo](docs/demo-placeholder.gif)
