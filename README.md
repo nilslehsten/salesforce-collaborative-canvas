@@ -289,7 +289,7 @@ force-app/main/default/
 
 ## Roadmap
 
-- [x] Undo/Redo history (Ctrl+Z / Ctrl+Y) - 50-step history
+- [x] Undo/Redo history (Ctrl+Z / Ctrl+Y) - 5-step history
 - [x] Copy/Paste/Cut (Ctrl+C / Ctrl+V / Ctrl+X)
 - [x] Activity cards (Tasks, Events, Emails)
 - [x] Connector labels with color picker
