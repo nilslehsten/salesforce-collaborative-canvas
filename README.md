@@ -293,6 +293,7 @@ force-app/main/default/
 - [x] Copy/Paste/Cut (Ctrl+C / Ctrl+V / Ctrl+X)
 - [x] Activity cards (Tasks, Events, Emails)
 - [x] Connector labels with color picker
+- [ ] Emoji Support
 - [ ] State conflict prevention (optimistic locking)
 - [ ] Export to PNG/PDF
 - [ ] Templates (pre-built layouts)
