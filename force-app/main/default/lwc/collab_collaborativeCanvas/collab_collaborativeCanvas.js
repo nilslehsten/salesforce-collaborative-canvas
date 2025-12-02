@@ -985,6 +985,8 @@ export default class Collab_collaborativeCanvas extends NavigationMixin(Lightnin
                 break;
             case 'user_join':
                 this.showToast('User Joined', `${userName} joined the canvas`, 'info');
+                // Auto-save so the joining user gets current state
+                this.saveStateForNewUser();
                 break;
             case 'user_leave':
                 this.showToast('User Left', `${userName} left the canvas`, 'info');
@@ -6067,6 +6069,12 @@ export default class Collab_collaborativeCanvas extends NavigationMixin(Lightnin
                 eventType: 'user_join',
                 payload: JSON.stringify({ timestamp: Date.now() })
             });
+            // Reload state after delay to get any unsaved changes from other users
+            // Other users auto-save when they receive user_join event
+            setTimeout(() => {
+                console.log(DEBUG_PREFIX, 'Reloading state after join delay');
+                this.loadState();
+            }, 1000);
         } catch (error) {
             console.error(DEBUG_PREFIX, 'Failed to announce join:', error);
         }
@@ -6086,6 +6094,27 @@ export default class Collab_collaborativeCanvas extends NavigationMixin(Lightnin
     }
 
     // ========== Persistence ==========
+
+    /**
+     * Silent save triggered when a new user joins.
+     * Ensures joining user loads the current canvas state.
+     */
+    async saveStateForNewUser() {
+        try {
+            const state = {
+                objects: this.objects,
+                strokes: this.strokes,
+                connectors: this.connectors
+            };
+            await saveCanvasState({
+                canvasId: this.canvasId,
+                stateJson: JSON.stringify(state)
+            });
+            console.log(DEBUG_PREFIX, 'Auto-saved state for new user');
+        } catch (error) {
+            console.error(DEBUG_PREFIX, 'Auto-save for new user failed:', error);
+        }
+    }
 
     async handleSave() {
         console.log(DEBUG_PREFIX, '=== handleSave START ===');
