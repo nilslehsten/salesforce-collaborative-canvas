@@ -56,39 +56,39 @@ No external services. No webhooks. No middleware. **100% native Salesforce.**
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         USER BROWSERS                           │
-│    ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐          │
-│    │ User A  │  │ User B  │  │ User C  │  │ User D  │          │
-│    │  (LWC)  │  │  (LWC)  │  │  (LWC)  │  │  (LWC)  │          │
-│    └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘          │
+│    ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐           │
+│    │ User A  │  │ User B  │  │ User C  │  │ User D  │           │
+│    │  (LWC)  │  │  (LWC)  │  │  (LWC)  │  │  (LWC)  │           │
+│    └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘           │
 └─────────┼────────────┼────────────┼────────────┼────────────────┘
           │            │            │            │
           ▼            ▼            ▼            ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    SALESFORCE PLATFORM                          │
 │                                                                 │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │              CURSOR SYSTEM (High Frequency)                │ │
-│  │                                                            │ │
-│  │   • Platform Cache (Org) with 300s TTL                    │ │
-│  │   • Poll every 50ms (20/sec)                              │ │
-│  │   • Delta compression (only send changes >10px)           │ │
-│  │   • Client-side interpolation for smooth 60fps movement   │ │
-│  └───────────────────────────────────────────────────────────┘ │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │              CURSOR SYSTEM (High Frequency)               │  │
+│  │                                                           │  │
+│  │   • Platform Cache (Org) with 300s TTL                    │  │
+│  │   • Poll every 50ms (20/sec)                              │  │
+│  │   • Delta compression (only send changes >10px)           │  │
+│  │   • Client-side interpolation for smooth 60fps movement   │  │
+│  └───────────────────────────────────────────────────────────┘  │
 │                                                                 │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │              OBJECT SYSTEM (Reliable Sync)                 │ │
-│  │                                                            │ │
-│  │   • Platform Events (HighVolume)                          │ │
-│  │   • EMP API subscription in browser                       │ │
-│  │   • Event types: add, move, resize, style, delete         │ │
-│  └───────────────────────────────────────────────────────────┘ │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │              OBJECT SYSTEM (Reliable Sync)                │  │
+│  │                                                           │  │
+│  │   • Platform Events (HighVolume)                          │  │
+│  │   • EMP API subscription in browser                       │  │
+│  │   • Event types: add, move, resize, style, delete         │  │
+│  └───────────────────────────────────────────────────────────┘  │
 │                                                                 │
-│  ┌───────────────────────────────────────────────────────────┐ │
-│  │              PERSISTENCE LAYER                             │ │
-│  │                                                            │ │
-│  │   • collab_Canvas_State__c (JSON storage)                 │ │
-│  │   • Auto-save on changes                                  │ │
-│  └───────────────────────────────────────────────────────────┘ │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │              PERSISTENCE LAYER                            │  │
+│  │                                                           │  │
+│  │   • collab_Canvas_State__c (JSON storage)                 │  │
+│  │   • Auto-save on changes                                  │  │
+│  └───────────────────────────────────────────────────────────┘  │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
